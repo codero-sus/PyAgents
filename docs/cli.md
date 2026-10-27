@@ -34,6 +34,7 @@ Useful flags:
 | `--json` | print the full `RunResult` as JSON |
 | `--quiet` | print nothing but errors |
 | `--verbose` | print a one-line run summary to stderr |
+| `--human-review` | prompt a human to approve or edit the agent's answer before finishing |
 
 ```bash
 $ pyagents run "hello world" --provider echo
@@ -55,6 +56,16 @@ $ pyagents run "17 * 23 + 100" --tools calculator --provider openai --json
   "status": "completed",
   ...
 }
+
+Human review (pipe your answer in):
+
+```bash
+$ echo "Approved." | pyagents run "Summarise this" --provider echo --human-review
+You said: "Summarise this". (This is the offline echo provider.)
+
+Your response (approve by pressing Enter with no changes,
+or type a revised answer): you> Approved.
+Approved.
 ```
 
 Exit codes: `0` success, `1` for configuration or provider errors (including a

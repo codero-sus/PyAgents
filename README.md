@@ -126,6 +126,13 @@ flow.add(writer, name="write", depends_on=["research"],
          input_template="Task: {task}\nNotes: {research}")
 flow.set_output("write")
 print(flow.run("Summarise this quarter").output)
+
+# human-in-the-loop review step
+from pyagents import Agent, HumanAgent, sequential
+
+editor = HumanAgent("editor", instructions="Approve or rewrite the draft.")
+pipeline = sequential(researcher, editor)
+pipeline.run("Explain HTTPS simply")
 ```
 
 ### 5. Persist and inspect runs
@@ -226,6 +233,7 @@ Runnable, offline examples live in [`examples/`](examples):
 | `06_workflow.py` | DAG workflows with function and agent nodes |
 | `07_custom_provider.py` | writing and testing a new provider |
 | `08_testing_agents.py` | testing agents with the built-in fakes |
+| `09_human_in_the_loop.py` | human-in-the-loop review inside a pipeline |
 
 ```bash
 python examples/01_hello_agent.py

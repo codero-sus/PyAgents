@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from . import __version__
 from .agent import Agent
 from .errors import PyAgentsError
+from .human import HumanAgent
 from .llm import PROVIDERS, BaseProvider, default_provider, get_provider
 from .memory import BufferMemory
 from .stores import SQLiteRunStore, store_from_uri
@@ -142,6 +143,27 @@ def cmd_run(args: argparse.Namespace) -> int:
         if run_result is None:  # pragma: no cover - defensive
             print("error: run produced no result", file=sys.stderr)
             return 1
+
+        # Human-in-the-loop: let a person approve or edit the agent's answer.
+        if args.human_review:
+            reviewer = HumanAgent(
+                "reviewer",
+                instructions="Review the agent's answer below. "
+                "Approve it as-is, or type a revised version.",
+                interactive=True,
+            )
+            review_prompt = (
+                f"Agent answer:\n{run_result.output}\n\n"
+                "Your response (approve by pressing Enter with no changes, "
+                "or type a revised answer):"
+            )
+            edited = reviewer.call(review_prompt)
+            if edited.strip():
+                run_result.output = edited.strip()
+                run_result.metadata["human_edited"] = True
+            else:
+                run_result.metadata["human_approved"] = True
+
         if not args.quiet:
             if stream:
                 print()
@@ -396,6 +418,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--quiet", action="store_true", help="suppress the final answer printing"
     )
     run_parser.add_argument("--verbose", action="store_true", help="print a run summary to stderr")
+    run_parser.add_argument(
+        "--human-review",
+        action="store_true",
+        help="prompt a human to approve or edit the agent's answer before finishing",
+    )
     run_parser.set_defaults(func=cmd_run)
 
     chat_parser = subparsers.add_parser("chat", help="interactive chat session")
