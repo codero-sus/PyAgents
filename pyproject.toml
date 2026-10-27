@@ -1,0 +1,114 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyagents"
+version = "0.1.0"
+description = "A zero-dependency, async-first framework for building multi-agent LLM applications in Python."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "PyAgents contributors" }]
+keywords = ["llm", "agents", "multi-agent", "openai", "anthropic", "ollama", "async", "framework"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+# Extra HTTP backend (better connection pooling + native async I/O).
+http = ["httpx>=0.24"]
+# Optional structured-output validation.
+pydantic = ["pydantic>=2.0"]
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+  "httpx>=0.24",
+  "pydantic>=2.0",
+  "ruff>=0.4",
+  "mypy>=1.8",
+]
+docs = [
+  "mkdocs>=1.5",
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.24",
+]
+
+[project.urls]
+Homepage = "https://github.com/codero-sus/PyAgents"
+Repository = "https://github.com/codero-sus/PyAgents"
+Issues = "https://github.com/codero-sus/PyAgents/issues"
+Documentation = "https://github.com/codero-sus/PyAgents/tree/main/docs"
+
+[project.scripts]
+pyagents = "pyagents.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pyagents = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+
+[tool.coverage.run]
+source = ["src/pyagents"]
+branch = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = ["src", "tests", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "RET", "ARG", "PTH", "RUF"]
+ignore = [
+  "E501",   # long lines are handled by the formatter
+  "B008",   # function calls in argument defaults (used deliberately for factories)
+  "ARG002", # unused method arguments (part of protocol implementations)
+  "RUF012", # ClassVar annotation is too noisy for this code base
+  "RUF022", # __all__ is grouped by topic rather than sorted
+  # The typing module spellings are kept deliberately: this package supports
+  # Python 3.9, where ``int | None`` and ``list[int]`` annotations cannot be
+  # resolved at runtime by ``typing.get_type_hints`` (which the schema builder
+  # relies on).
+  "UP006",
+  "UP007",
+  "UP035",
+  "UP045",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG001", "ARG002", "SIM117", "B011"]
+"examples/*" = ["T201", "ARG001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pyagents"]
+
+[tool.mypy]
+# mypy dropped support for checking against 3.9; the package itself still runs
+# on 3.9+ (see `requires-python`), it is simply type-checked against 3.10.
+python_version = "3.10"
+files = ["src/pyagents"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+ignore_missing_imports = true
