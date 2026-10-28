@@ -48,6 +48,7 @@ from .errors import (
     ToolNotFoundError,
     ToolValidationError,
 )
+from .human import HumanAgent
 from .llm import (
     PROVIDERS,
     AnthropicProvider,
@@ -105,6 +106,8 @@ __all__ = [
     "WorkflowContext",
     "sequential",
     "parallel",
+    # human-in-the-loop
+    "HumanAgent",
     # tools
     "Tool",
     "Toolkit",

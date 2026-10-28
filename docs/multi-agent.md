@@ -188,6 +188,38 @@ for event in pipeline.stream("..."):
 orchestrator pattern and `Agent.as_tool`); sequential pipelines record the same
 information as `Handoff` entries on the result.
 
+## Human-in-the-loop
+
+Sometimes the best "agent" is a person. `HumanAgent` lets a human review,
+approve or rewrite an agent's answer inside a team or pipeline, without
+requiring an LLM call for that step::
+
+    from pyagents import Agent, HumanAgent, sequential
+
+    researcher = Agent("researcher", instructions="Find the facts.")
+    editor = HumanAgent("editor", instructions="Approve or rewrite the draft.")
+
+    pipeline = sequential(researcher, editor)
+    result = pipeline.run("Write a brief on HTTPS.")
+
+The human's response becomes `editor`'s output and flows into the next team
+member exactly like any other agent result. Use it for compliance review,
+fact-checking, or any step where a person needs to be in the loop.
+
+`HumanAgent` supports the same interface as `Agent` (`run`, `arun`, `stream`,
+`astream`, `call`, `acall`) and works in sequential, parallel and orchestrator
+teams. It reads from `sys.stdin` by default, or you can pass an `input=`
+callable for scripted or programmatic responses::
+
+    from pyagents.human import HumanAgent
+
+    reviewer = HumanAgent("reviewer", input=lambda prompt: "Approved.")
+
+From the CLI, pass `--human-review` to `pyagents run` to prompt a human to
+approve or edit the agent's answer before the command finishes::
+
+    pyagents run "Write a brief on HTTPS" --human-review
+
 ## Which pattern should I use?
 
 - **One agent with tools** - start here. Most "multi-agent" problems are one
